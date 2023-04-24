@@ -26,25 +26,16 @@ class Hackermove:
 
         if as_df:
             self.df = pd.DataFrame(self.results)
-            self.df = self.df.fillna(value=np.nan)
-            self.df["size"] = self.df["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
-            self.df["value"] = (self.df.price / self.df["size"]).round(0)
+            self.df = self.clean_data(self.df)
 
             if self.filter_size:
                 self.df = self.df[self.df["size"].notna()]
-                self.df = self.df.sort_values("size", ascending=False)
 
             if self.filter_percentile:
                 self.df = self.df[
                     (self.df["size"] > self.df["size"].quantile(self.filter_percentile / 100)) &
                     (self.df["size"] < self.df["size"].quantile((100 - self.filter_percentile) / 100))
                 ]
-
-            print(f"Median price: {self.df.price.median()}")
-            print(f"Mean price: {self.df.price.mean()}")
-            if self.filter_size:
-                print(f"Median size: {self.df['size'].median()}")
-                print(f"Mean size: {self.df['size'].mean()}")
 
             return self.df
 
@@ -76,6 +67,12 @@ class Hackermove:
             properties.extend([r for result in task_results for r in result])
 
         return properties
+
+    def clean_data(self, data):
+        data = data.fillna(value=np.nan)
+        data["size"] = data["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
+        data["value"] = (data.price / data["size"]).round(0)
+        return data
 
     def parse_property(self, item: dict):
         return {

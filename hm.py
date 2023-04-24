@@ -14,12 +14,12 @@ LOCATIONS = {
 
 def main():
     hm = Hackermove(
-        # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=1&minBedrooms=1&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
+        "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=1&minBedrooms=1&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
         # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=2&minBedrooms=2&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
         # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E61305&maxBedrooms=1&minBedrooms=1&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
-        "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93965&maxBedrooms=1&minBedrooms=1&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
+        # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93965&maxBedrooms=1&minBedrooms=1&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
         filter_size=True,
-        filter_percentile=5,
+        # filter_percentile=5,
     )
     result = hm.fetch(as_df=True)
 
@@ -32,7 +32,7 @@ def main():
     print(result.sort_values("price")[:10])
 
     print("Sorted by size")
-    print(result[:20])
+    print(result.sort_values("size", ascending=False)[:20])
 
     print("Sorted by value")
     print(result.sort_values("value")[:20])
