@@ -18,7 +18,10 @@ class Hackermove:
         self._json_var = "window.jsonModel"
         self._base_url = "https://www.rightmove.co.uk"
 
-    async def fetch(self, as_df: bool = False):
+    def fetch(self, as_df: bool = False):
+        return asyncio.run(self._fetch(as_df))
+
+    async def _fetch(self, as_df: bool = False):
         self.results = await self.process_url(self.url)
 
         if as_df:

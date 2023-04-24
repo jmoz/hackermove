@@ -1,7 +1,4 @@
-import asyncio
-
 import pandas as pd
-
 from hackermove import Hackermove
 
 pd.set_option('display.max_colwidth', None)
@@ -15,7 +12,7 @@ LOCATIONS = {
 }
 
 
-async def main():
+def main():
     hm = Hackermove(
         # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=1&minBedrooms=1&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
         # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=2&minBedrooms=2&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
@@ -24,7 +21,7 @@ async def main():
         filter_size=True,
         filter_percentile=5,
     )
-    result = await hm.fetch(as_df=True)
+    result = hm.fetch(as_df=True)
 
     # result = result[(result["price"] >= 400000) & (result["price"] <= 600000)]
 
@@ -48,4 +45,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
