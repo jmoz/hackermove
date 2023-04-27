@@ -1,5 +1,7 @@
 import pandas as pd
+
 from hackermove import Hackermove, Query
+from hackermove.args import load_args
 
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.max_columns', None)
@@ -13,12 +15,14 @@ LOCATIONS = {
 
 
 def main():
+    args = load_args()
+
     q = Query(
-        location="Walthamstow",
-        min_beds=2,
-        max_beds=2,
-        min_price=350000,
-        max_price=650000,
+        location=args.location,
+        min_beds=args.minbeds or args.beds,
+        max_beds=args.maxbeds or args.beds,
+        min_price=args.minprice,
+        max_price=args.maxprice,
     )
 
     hm = Hackermove(
@@ -27,8 +31,6 @@ def main():
         filter_percentile=False,
     )
     result = hm.fetch(as_df=True)
-
-    # result = result[(result["price"] >= 400000) & (result["price"] <= 600000)]
 
     print("Latest")
     print(result.sort_values("date", ascending=False)[:10])
