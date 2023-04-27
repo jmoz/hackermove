@@ -1,5 +1,5 @@
 import pandas as pd
-from hackermove import Hackermove
+from hackermove import Hackermove, Query
 
 pd.set_option('display.max_colwidth', None)
 pd.set_option('display.max_columns', None)
@@ -13,17 +13,25 @@ LOCATIONS = {
 
 
 def main():
+    q = Query(
+        location="Walthamstow",
+        min_beds=2,
+        max_beds=2,
+        min_price=350000,
+        max_price=650000,
+    )
+
     hm = Hackermove(
-        "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=1&minBedrooms=1&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
-        # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=2&minBedrooms=2&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
-        # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E61305&maxBedrooms=1&minBedrooms=1&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
-        # "https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93965&maxBedrooms=1&minBedrooms=1&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=",
-        filter_size=True,
-        # filter_percentile=5,
+        query=q,
+        filter_size=False,
+        filter_percentile=False,
     )
     result = hm.fetch(as_df=True)
 
     # result = result[(result["price"] >= 400000) & (result["price"] <= 600000)]
+
+    print("Latest")
+    print(result.sort_values("date", ascending=False)[:10])
 
     print("Most expensive")
     print(result.sort_values("price", ascending=False)[:10])
@@ -37,6 +45,7 @@ def main():
     print("Sorted by value")
     print(result.sort_values("value")[:20])
 
+    print(f"Total results: {result.size}")
     print(f"Median price: {result.price.median()}")
     print(f"Mean price: {result.price.mean()}")
     if hm.filter_size:

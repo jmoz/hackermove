@@ -1,14 +1,20 @@
 import asyncio
 import json
+import logging
+from urllib.parse import urlencode
 
-import aiohttp
 import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 
+from .http import get
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 
 class Hackermove:
-    def __init__(self, url, filter_size: bool = False, filter_percentile: int | bool = False):
+    def __init__(self, url=None, query=None, filter_size: bool = False, filter_percentile: int | bool = False):
         """
         Provide the url to process and filtering options.
         Instance vars can be overriden to update functionality.
@@ -18,6 +24,7 @@ class Hackermove:
         :param filter_percentile:
         """
         self.url = url
+        self.query = query
         self.filter_size = filter_size
         self.filter_percentile = filter_percentile
         self.results = None
@@ -42,6 +49,9 @@ class Hackermove:
         :param as_df:
         :return:
         """
+        if self.query:
+            self.url = await self.query.get()
+
         self.results = await self.process_url(self.url)
 
         if as_df:
@@ -61,17 +71,6 @@ class Hackermove:
 
         return self.results
 
-    async def get(self, url: str):
-        """
-        GET url using aiohttp.
-
-        :param url:
-        :return:
-        """
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                return await response.text()
-
     async def process_url(self, url: str, recurse: bool = True):
         """
         Fetch the url then process the html into data, optionally recurse for any more pages.
@@ -80,7 +79,7 @@ class Hackermove:
         :param recurse:
         :return:
         """
-        result = await self.get(url)
+        result = await get(url)
 
         parsed = BeautifulSoup(result, "lxml")
         script_tags = parsed.find_all("script")
@@ -105,11 +104,12 @@ class Hackermove:
         """
         Clean and add any fields to the dataframe of results.
         Extend and override this method to change functionality.
-        
-        :param data: 
-        :return: 
+
+        :param data:
+        :return:
         """
         data = data.fillna(value=np.nan)
+        data["date"] = pd.to_datetime(data["date"])
         data["size"] = data["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
         data["value"] = (data.price / data["size"]).round(0)
         return data
@@ -119,8 +119,8 @@ class Hackermove:
         Parse each of the property item data we receive. Not all data is used atm.
         Extend and override this method to change functionality.
 
-        :param item: 
-        :return: 
+        :param item:
+        :return:
         """
         return {
             "id": item["id"],
@@ -130,4 +130,68 @@ class Hackermove:
             "price": item["price"]["amount"],
             "size": item["displaySize"] or None,
             "url": f"{self._base_url}{item['propertyUrl']}",
+            "date": item["listingUpdate"]["listingUpdateDate"],
         }
+
+
+class Query:
+    def __init__(self, location, min_beds=None, max_beds=None, min_price=None, max_price=None, ):
+        self.location = location
+        self.location_identifier = None
+        self.min_beds = min_beds
+        self.max_beds = max_beds
+        self.min_price = min_price
+        self.max_price = max_price
+        self._search_base_url = "https://www.rightmove.co.uk/typeAhead/uknostreet/"
+        self._base_url = "https://www.rightmove.co.uk/property-for-sale/find.html"
+        self._n = 2
+
+    async def get_location_identifier(self):
+        """
+        Split location search every 2 chars with /
+        foobar -> fo/ob/ar
+        :return:
+        """
+        query = "/".join([self.location.upper()[i:i + self._n] for i in range(0, len(self.location), self._n)])
+        result = await get(self._search_base_url + query)
+        result_json = json.loads(result)
+
+        try:
+            location = result_json["typeAheadLocations"][0]
+            location_identifier = location["locationIdentifier"]
+            logger.info(f"Found location {location}")
+        except KeyError as e:
+            logger.error(f"Error finding location: {e}", exc_info=True)
+            raise RuntimeError
+
+        return location_identifier
+
+    async def get(self):
+        """
+        Get the location identifier first from the location search string, then construct a parameterised request
+        from instance vars, then create the url.
+
+        Output: https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=REGION%5E93953&maxBedrooms=1&minBedrooms=1&maxPrice=600000&minPrice=400000&sortType=6&propertyTypes=&includeSSTC=false&mustHave=&dontShow=&furnishTypes=&keywords=
+        :return:
+        """
+        self.location_identifier = await self.get_location_identifier()
+
+        params = {
+            "locationIdentifier": self.location_identifier,
+            "minBedrooms": self.min_beds or "",
+            "maxBedrooms": self.max_beds or "",
+            "minPrice": self.min_price or "",
+            "maxPrice": self.max_price or "",
+            "sortType": "6",  # Sort by newest so data is always fresh, but limited to max results from site
+            "propertyTypes": "",
+            "includeSSTC": "false",
+            "mustHave": "",
+            "dontShow": "",
+            "furnishTypes": "",
+            "keywords": "",
+        }
+        sorted_params = sorted(params.items(), key=lambda x: x[0])
+
+        url = f"{self._base_url}?{urlencode(sorted_params)}"
+        logger.info(f"Url: {url}")
+        return url
