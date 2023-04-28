@@ -1,5 +1,4 @@
 import pandas as pd
-
 from hackermove import Hackermove, Query
 from hackermove.args import load_args
 
