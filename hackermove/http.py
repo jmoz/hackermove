@@ -1,7 +1,7 @@
 import aiohttp
 
 
-async def get(url: str):
+async def get(url: str) -> str:
     """
     GET url using aiohttp.
 

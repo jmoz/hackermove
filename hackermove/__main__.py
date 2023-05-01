@@ -3,10 +3,10 @@ import pandas as pd
 from hackermove import Hackermove, Query
 from hackermove.args import load_args
 
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.min_rows', 20)
-pd.set_option('display.width', None)
+pd.set_option("display.max_colwidth", None)
+pd.set_option("display.max_columns", None)
+pd.set_option("display.min_rows", 20)
+pd.set_option("display.width", None)
 
 LOCATIONS = {
     "Hackney": "REGION%5E93953",
@@ -14,7 +14,7 @@ LOCATIONS = {
 }
 
 
-def main():
+def main() -> None:
     args = load_args()
 
     q = Query(

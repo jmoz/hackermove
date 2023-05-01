@@ -1,0 +1,18 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+# E pycodestyle
+# F Pyflakes
+# I isort
+# UP pyupgrade
+# ANN flake8-annotations
+select = ["E", "F", "I", "UP", "ANN"]
+# ANN002 Missing type annotation for `*args`
+# ANN003 Missing type annotation for `**kwargs`
+# ANN101 Missing type annotation for self in method
+# ANN204 Missing return type annotation for special method `__init__`
+ignore = ["ANN002", "ANN003", "ANN101", "ANN204"]
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
