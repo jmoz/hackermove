@@ -109,6 +109,7 @@ class Hackermove:
         :return:
         """
         data = data.fillna(value=np.nan)
+        data = data[~data.duplicated()]
         data["date"] = pd.to_datetime(data["date"])
         data["size"] = data["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
         data["value"] = (data.price / data["size"]).round(0)

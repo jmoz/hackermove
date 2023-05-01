@@ -47,7 +47,7 @@ def main():
     print("Sorted by value")
     print(result.sort_values("value")[:20])
 
-    print(f"Total results: {result.size}")
+    print(f"Total results: {len(result)}")
     print(f"Median price: {result.price.median()}")
     print(f"Mean price: {result.price.mean()}")
     if hm.filter_size:
