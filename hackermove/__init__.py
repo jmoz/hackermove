@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from json import JSONDecodeError
 from urllib.parse import urlencode
 
 import numpy as np
@@ -40,7 +41,12 @@ class Query:
         """
         query = "/".join([self.location.upper()[i : i + self._n] for i in range(0, len(self.location), self._n)])
         result = await get(self._search_base_url + query)
-        result_json = json.loads(result)
+
+        try:
+            result_json = json.loads(result)
+        except JSONDecodeError as e:
+            logger.error(f"Location not found: {e}")
+            raise RuntimeError
 
         try:
             location = result_json["typeAheadLocations"][0]
@@ -187,7 +193,11 @@ class Hackermove:
         data = data.fillna(value=np.nan)
         data = data[~data.duplicated()]
         data["date"] = pd.to_datetime(data["date"])
-        data["size"] = data["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
+        try:
+            # catch any errors for when small results with no size
+            data["size"] = data["size"].str.replace(" sq. ft.", "").str.replace(",", "").astype("float64")
+        except AttributeError:
+            pass
         data["value"] = (data.price / data["size"]).round(0)
         return data
 
