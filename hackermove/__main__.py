@@ -17,15 +17,23 @@ LOCATIONS = {
 def main() -> None:
     args = load_args()
 
-    q = Query(
-        location=args.location,
-        min_beds=args.minbeds or args.beds,
-        max_beds=args.maxbeds or args.beds,
-        min_price=args.minprice,
-        max_price=args.maxprice,
-    )
+    if args.url:
+        url = args.url
+        q = None
+    elif args.location:
+        url = None
+        q = Query(
+            location=args.location,
+            min_beds=args.minbeds or args.beds,
+            max_beds=args.maxbeds or args.beds,
+            min_price=args.minprice,
+            max_price=args.maxprice,
+        )
+    else:
+        raise RuntimeError("Must specify a url or location")
 
     hm = Hackermove(
+        url=url,
         query=q,
         filter_size=False,
         filter_percentile=False,
