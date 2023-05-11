@@ -17,11 +17,12 @@ LOCATIONS = {
 def main() -> None:
     args = load_args()
 
+    q = None
+    url = None
+
     if args.url:
         url = args.url
-        q = None
     elif args.location:
-        url = None
         q = Query(
             location=args.location,
             min_beds=args.minbeds or args.beds,
@@ -41,19 +42,19 @@ def main() -> None:
     result = hm.fetch(as_df=True)
 
     print("Latest")
-    print(result.sort_values("date", ascending=False)[:10])
+    print(result.sort_values("date", ascending=False)[:args.rows])
 
     print("Most expensive")
-    print(result.sort_values("price", ascending=False)[:10])
+    print(result.sort_values("price", ascending=False)[:args.rows])
 
     print("Least expensive")
-    print(result.sort_values("price")[:10])
+    print(result.sort_values("price")[:args.rows])
 
     print("Sorted by size")
-    print(result.sort_values("size", ascending=False)[:20])
+    print(result.sort_values("size", ascending=False)[:args.rows])
 
     print("Sorted by value")
-    print(result.sort_values("value")[:20])
+    print(result.sort_values("value")[:args.rows])
 
     print(f"Total results: {len(result)}")
     print(f"Median price: {result.price.median()}")

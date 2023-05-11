@@ -11,5 +11,6 @@ def load_args() -> Namespace:
     parser.add_argument("--maxbeds", default=None, type=int, help="Maximum beds")
     parser.add_argument("--minprice", default=None, type=int, help="Minimum price")
     parser.add_argument("--maxprice", default=None, type=int, help="Maximum price")
+    parser.add_argument("--rows", default=20, type=int, help="Number of rows to display in table")
     args = parser.parse_args()
     return args
