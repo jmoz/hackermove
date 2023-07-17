@@ -135,6 +135,10 @@ class Hackermove:
             self.url = await self.query.get()
 
         self.results = await self.process_url(self.url)
+        # remove duplicates by id
+        self.results = list({x["id"]: x for x in self.results}.values())
+        # sort the results desc by id (ordering could be wrong because of advertisements)
+        self.results = sorted(self.results, key=lambda x: x["id"], reverse=True)
 
         if as_df:
             self.df = pd.DataFrame(self.results)
