@@ -39,7 +39,7 @@ class Query:
         foobar -> fo/ob/ar
         :return:
         """
-        query = "/".join([self.location.upper()[i : i + self._n] for i in range(0, len(self.location), self._n)])
+        query = "/".join([self.location.upper()[i: i + self._n] for i in range(0, len(self.location), self._n)])
         result = await get(self._search_base_url + query)
 
         try:
@@ -219,7 +219,33 @@ class Hackermove:
             "bedrooms": item["bedrooms"],
             "bathrooms": item["bathrooms"],
             "price": item["price"]["amount"],
-            "size": item["displaySize"] or None,
+            "size": item["displaySize"] or self.parse_summary_size(item["summary"]) or None,
             "url": f"{self._base_url}{item['propertyUrl']}",
             "date": item["listingUpdate"]["listingUpdateDate"],
+            "property_type": item["propertySubType"],
+            "tenure": self.parse_summary_tenure(item["summary"]),
         }
+
+    def parse_summary_size(self, summary: str) -> int:
+        """
+        We may be able to parse the size from the summary intro text.
+        Extend and override this method to change functionality.
+
+        :param summary:
+        :return:
+        """
+        pass
+
+    def parse_summary_tenure(self, summary: str) -> str | None:
+        """
+        We may be able to parse the tenure from the summary intro text.
+
+        :param summary:
+        :return:
+        """
+        if "lease" in summary:
+            return "Leasehold"
+        elif "freehold" in summary:
+            return "Freehold"
+        else:
+            return None
