@@ -23,13 +23,24 @@ class Query:
         max_beds: int | None = None,
         min_price: int | None = None,
         max_price: int | None = None,
+        property_types: str | None = None,
     ):
+        """
+
+        :param location:
+        :param min_beds:
+        :param max_beds:
+        :param min_price:
+        :param max_price:
+        :param property_types: csv, terraced|detached|semi-detached|flat|bungalow|land|park-home
+        """
         self.location = location
         self.location_identifier = None
         self.min_beds = min_beds
         self.max_beds = max_beds
         self.min_price = min_price
         self.max_price = max_price
+        self.property_types = property_types
         self._search_base_url = "https://www.rightmove.co.uk/typeAhead/uknostreet/"
         self._base_url = "https://www.rightmove.co.uk/property-for-sale/find.html"
         self._n = 2
@@ -76,7 +87,7 @@ class Query:
             "minPrice": self.min_price or "",
             "maxPrice": self.max_price or "",
             "sortType": "6",  # Sort by newest so data is always fresh, but limited to max results from site
-            "propertyTypes": "",
+            "propertyTypes": self.property_types or "",
             "includeSSTC": "false",
             "mustHave": "",
             "dontShow": "",

@@ -29,6 +29,7 @@ def main() -> None:
             max_beds=args.maxbeds or args.beds,
             min_price=args.minprice,
             max_price=args.maxprice,
+            property_types=args.types,
         )
     else:
         raise RuntimeError("Must specify a url or location")
