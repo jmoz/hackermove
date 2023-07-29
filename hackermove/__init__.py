@@ -233,12 +233,21 @@ class Hackermove:
             "bedrooms": item["bedrooms"],
             "bathrooms": item["bathrooms"],
             "price": item["price"]["amount"],
-            "size": item["displaySize"] or self.parse_summary_size(item["summary"]) or None,
+            "size": self.parse_size(item["displaySize"]) or self.parse_summary_size(item["summary"]) or None,
             "url": f"{self._base_url}{item['propertyUrl']}",
             "date": item["listingUpdate"]["listingUpdateDate"],
             "property_type": item["propertySubType"],
             "tenure": self.parse_summary_tenure(item["summary"]),
         }
+
+    def parse_size(self, value: str) -> int | None:
+        """
+        Size is a str '626 sq. ft.' so split on space and return the integer, or return None.
+        """
+        if not value:
+            return None
+
+        return int(value.split()[0])
 
     def parse_summary_size(self, summary: str) -> int:
         """
@@ -248,7 +257,7 @@ class Hackermove:
         :param summary:
         :return:
         """
-        pass
+        return None
 
     def parse_summary_tenure(self, summary: str) -> str | None:
         """
