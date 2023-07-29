@@ -247,7 +247,7 @@ class Hackermove:
         if not value:
             return None
 
-        return int(value.split()[0])
+        return int(value.split()[0].replace(",", ""))
 
     def parse_summary_size(self, summary: str) -> int:
         """
