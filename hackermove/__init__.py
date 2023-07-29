@@ -149,6 +149,8 @@ class Hackermove:
         self.results = await self.process_url(self.url)
         # remove duplicates by id
         self.results = list({x["id"]: x for x in self.results}.values())
+        # there is a small chance a just uploaded property will have no date initially, then it gets set to today's date
+        self.results = [r for r in self.results if r["date"]]
         # sort the results desc by date (ordering could be wrong because of advertisements)
         self.results = sorted(self.results, key=lambda x: datetime.fromisoformat(x["date"]), reverse=True)
 
