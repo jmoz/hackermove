@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from .http import get
+from hackermove.http import get
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -92,7 +92,7 @@ class Query:
             "mustHave": "",
             "dontShow": "",
             "furnishTypes": "",
-            "keywords": "",
+            "keywords": "freehold,leasehold",
         }
         sorted_params = sorted(params.items(), key=lambda x: x[0])
 
@@ -237,7 +237,7 @@ class Hackermove:
             "url": f"{self._base_url}{item['propertyUrl']}",
             "date": item["listingUpdate"]["listingUpdateDate"],
             "property_type": item["propertySubType"],
-            "tenure": self.parse_summary_tenure(item["summary"]),
+            "tenure": self.parse_tenure(item),
         }
 
     def parse_size(self, value: str) -> int | None:
@@ -259,16 +259,22 @@ class Hackermove:
         """
         return None
 
-    def parse_summary_tenure(self, summary: str) -> str | None:
+    def parse_tenure(self, item: str) -> str | None:
         """
         We may be able to parse the tenure from the summary intro text.
 
         :param summary:
         :return:
         """
-        if "lease" in summary:
+        if "lease" in item["summary"]:
             return "Leasehold"
-        elif "freehold" in summary:
+        elif "freehold" in item["summary"]:
             return "Freehold"
-        else:
-            return None
+        elif item["keywords"]:
+            for kw in item["keywords"]:
+                if kw["keyword"] == "freehold" and kw["matched"]:
+                    return "Freehold"
+                elif kw["keyword"] == "leasehold" and kw["matched"]:
+                    return "Leasehold"
+
+        return None
